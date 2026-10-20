@@ -205,7 +205,7 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
    sync();$('readStatus').textContent='Referencia activa';
  });
  $('reviewBtn').addEventListener('click',()=>{$('manualPanel').classList.toggle('hidden')});
- // Selectores separados: cámara en un input con capture; galería en otro sin capture.
+ // Selectores separados para evitar que capture fuerce la cámara al elegir de galería.
  $('openCamera').addEventListener('click',()=> $('cameraFile').click());
  $('upload').addEventListener('click',()=> $('galleryFile').click());
 
@@ -219,13 +219,7 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
      let meta=null;
      if(window.exifr && typeof window.exifr.parse==='function'){
        meta=await window.exifr.parse(f,{
-          tiff:true,
-          exif:true,
-          iptc:false,
-          icc:false,
-          xmp:false,
-          gps:false,
-          translateValues:true
+          tiff:true, exif:true, iptc:false, icc:false, xmp:false, gps:false, translateValues:true
         });
      }
      if(!meta) meta={};
@@ -253,7 +247,7 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
        if(timeValue||apValue||isoValue){baseline={time:state.time,ap:state.ap,iso:state.iso};Object.keys(wheels).forEach(renderWheel);sync();}
        $('readStatus').textContent='EXIF incompleto';
        $('resultTime').textContent=[timeValue||'—',apValue?'f/'+apValue:'—',isoValue?'ISO '+isoValue:'—'].join(' · ');
-       $('resultText').textContent='No se encontraron todos los datos de exposición en este archivo. '+(found.length?'Datos encontrados: '+found.join(', ')+'. ':'')+'Prueba con la foto original de la cámara, no una captura de pantalla ni una imagen reenviada por una app. También puedes introducir los valores que falten en “Revisar lectura”.';
+       $('resultText').textContent='No se encontraron todos los datos de exposición en este archivo. '+(input.id==='cameraFile'?'En iPhone, la cámara del navegador puede entregar una copia sin todos los EXIF. Guarda la foto en Fotos y usa “Elegir foto” para intentar leer el original. ':'')+(found.length?'Datos encontrados: '+found.join(', ')+'. ':'')+'Prueba con la foto original, no una captura de pantalla ni una imagen reenviada por una app. También puedes introducir los valores que falten en “Revisar lectura”.';
        $('liveBrightness').textContent='EXIF disponibles: '+(found.length?found.join(' · '):'ninguno de los parámetros principales');
      }
    }catch(err){
