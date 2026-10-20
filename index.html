@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1d1d1f">
+<title>SONRY · FOTOMETRÍA</title>
+<style>
+:root{color-scheme:dark;--bg:#111315;--panel:#2a2d30;--panel2:#4a4f55;--line:#24272a;--text:#f4f5f7;--muted:#b8bdc3;--accent:#b8bdc3;--soft:#34383d;--active:#4a4f55;--preview:#202428}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{max-width:540px;margin:auto;min-height:100dvh;padding:calc(18px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 28px}.brand{font-size:21px;font-weight:650;letter-spacing:.04em}.subtitle{font-size:12px;color:var(--muted);margin-top:4px}.iconbtn{border:0;background:none;color:var(--text);font-size:25px;padding:8px}
+.photo{border:1px solid #3b3b3e;background:#252527;border-radius:14px;overflow:hidden;margin-bottom:16px}.preview{height:180px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#39393c,#202022);position:relative;overflow:hidden}.preview video,.preview img{width:100%;height:100%;object-fit:cover}.placeholder{text-align:center;color:#b8b8bb;padding:20px}.placeholder .camera{font-size:35px;display:block;margin-bottom:8px}.photoactions{display:flex;gap:8px;padding:10px}.photoactions button{flex:1}
+button,select{font:inherit;color:var(--text);border:1px solid #525256;background:#38383b;border-radius:10px;padding:12px}button{cursor:pointer}button:active{transform:scale(.99)}.primary{background:#555558;border-color:#77777a;font-weight:650}.outline{background:transparent;border-color:#454549}
+.wheels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;border-radius:15px;overflow:hidden;background:#202022;border:1px solid #252527}
+.wheel{background:linear-gradient(#343436,#303032);min-width:0;position:relative;text-align:center}.wlabel{height:52px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;background:#262628}.roller{height:324px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;padding:135px 0;position:relative}.roller::-webkit-scrollbar{display:none}.option{height:54px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:clamp(17px,4.6vw,25px);color:#e6e6e7;user-select:none;cursor:pointer;white-space:nowrap}.option.active{background:#505053;font-weight:700;color:white}.selectionline{position:absolute;left:0;right:0;top:187px;height:54px;border-top:1px solid #202022;border-bottom:1px solid #202022;pointer-events:none}
+.lockrow{display:flex;justify-content:space-around;margin:0 0 18px;color:#888;font-size:22px}.lockrow button{border:0;background:transparent;padding:6px;color:#929295;font-size:19px}.lockrow button.locked{color:#fff}
+.current{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:13px 2px 18px;font-size:12px;color:var(--muted)}.current strong{color:var(--text);font-size:13px;text-align:right}
+.mainactions{display:grid;gap:10px;margin-top:22px}.mainactions button{width:100%;border-radius:30px;min-height:56px;font-size:18px}.result{margin-top:18px;border:1px solid #39393c;border-radius:14px;padding:15px;background:#262628}.resulthead{display:flex;justify-content:space-between;gap:10px;align-items:center}.badge{font-size:11px;color:#bdbdc0;border:1px solid #555559;padding:5px 8px;border-radius:20px}.big{font-size:27px;font-weight:700;margin:12px 0 4px}.small{font-size:12px;line-height:1.5;color:var(--muted)}.notice{margin-top:12px;font-size:11px;line-height:1.5;color:#a8a8ab}
+.hidden{display:none!important}.manual{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.manual label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}.manual select{width:100%}
+
+header{position:relative;justify-content:center;text-align:center;margin-bottom:22px;min-height:78px}
+.brandblock{display:flex;flex-direction:column;align-items:center;gap:2px}
+.brandlogo{display:block;width:118px;height:auto;max-height:38px;object-fit:contain}
+.brand{font-size:20px;font-weight:700;letter-spacing:.12em}
+.subtitle{font-size:12px}
+.iconbtn{position:absolute;right:0;top:8px}
+.palettebar{display:flex;align-items:center;gap:8px;margin:-8px 0 16px}
+.palettebar label{font-size:12px;color:var(--muted);white-space:nowrap}
+.palettebar select{width:100%;min-width:0;padding:10px 12px;background:var(--panel);border-color:var(--panel2)}
+body[data-palette="pink"]{--bg:#5b3a4e;--panel:#e47a9d;--panel2:#f3a6bd;--line:#f7c6d0;--text:#23151c;--muted:#513440;--accent:#7c304f;--soft:#f7c6d0;--active:#d95f88;--preview:#f3a6bd;color-scheme:light}
+body[data-palette="green"]{--bg:#344e41;--panel:#588157;--panel2:#a3b18a;--line:#dad7cd;--text:#ffffff;--muted:#ffffff;--accent:#a3b18a;--soft:#3a5a40;--active:#588157;--preview:#3a5a40;color-scheme:dark}
+body[data-palette="mono"]{--bg:#111315;--panel:#2a2d30;--panel2:#4a4f55;--line:#24272a;--text:#f4f5f7;--muted:#b8bdc3;--accent:#b8bdc3;--soft:#34383d;--active:#4a4f55;--preview:#202428;color-scheme:dark}
+.photo{background:var(--panel);border-color:var(--panel2)}
+.preview{background:linear-gradient(135deg,var(--panel2),var(--preview))}
+button,select{color:var(--text);border-color:var(--panel2);background:var(--soft)}
+.primary{background:var(--active);border-color:var(--panel2);color:var(--text)}
+.outline{background:transparent;border-color:var(--panel2)}
+.wheels{background:var(--bg);border-color:var(--line)}
+.wheel{background:linear-gradient(var(--panel),var(--soft))}
+.wlabel{background:var(--panel)}
+.option{color:var(--text);-webkit-text-fill-color:var(--text);text-shadow:0 1px 2px rgba(0,0,0,.18)}
+.option.active{background:var(--active);color:#fff;-webkit-text-fill-color:#fff}
+.subtitle{color:var(--text)}
+.placeholder{color:#fff}
+.placeholder .subtitle{color:#fff;font-weight:500}
+.wlabel{color:#fff}
+body[data-palette="green"] .roller .option{color:#fff;-webkit-text-fill-color:#fff}
+body[data-palette="green"] .wlabel{color:#fff}
+body[data-palette="green"] .current,body[data-palette="green"] .notice,body[data-palette="green"] .small{color:#fff}
+.selectionline{border-color:var(--line)}
+.result{background:var(--panel);border-color:var(--panel2)}
+.badge{color:var(--text);border-color:var(--panel2)}
+@media(max-height:760px){.roller{height:270px;padding:108px 0}.selectionline{top:160px}.option{height:54px}}
+
+/* Ajustes de legibilidad y selector centrado */
+header{color:#fff}
+.brand{color:#fff}
+header .subtitle{color:#fff!important}
+.placeholder,.placeholder strong,.placeholder .subtitle,.placeholder .camera{color:#fff!important;-webkit-text-fill-color:#fff}
+.wlabel{color:#fff!important;-webkit-text-fill-color:#fff}
+.option,.option.active{color:#fff!important;-webkit-text-fill-color:#fff}
+.palettebar{display:flex;justify-content:center;align-items:center;width:100%;margin:0 auto 16px;padding:0}
+.palettechoices{display:flex;justify-content:center;align-items:center;gap:14px;width:100%}
+.palettechip{display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border-radius:50%;font-size:25px;line-height:1;background:transparent;border:2px solid transparent;cursor:pointer}
+.palettechip[aria-pressed="true"],.palettechip.active{border-color:#fff;background:rgba(255,255,255,.12);box-shadow:0 0 0 2px rgba(255,255,255,.18)}
+body[data-palette="pink"]{--text:#fff;--muted:#fff;color:#fff}
+body[data-palette="pink"] .subtitle,
+body[data-palette="pink"] .small,
+body[data-palette="pink"] .notice,
+body[data-palette="pink"] .palettecurrent,
+body[data-palette="pink"] .placeholder,
+body[data-palette="pink"] .placeholder strong,
+body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-text-fill-color:#fff}
+
+.site-footer{width:100%;text-align:center;padding:24px 16px 30px;margin-top:28px;border-top:1px solid var(--line);box-sizing:border-box}
+.site-footer a{color:var(--text);text-decoration:none;font-size:13px;letter-spacing:.12em;opacity:.9}
+.site-footer a:hover{opacity:1;text-decoration:underline}
+@media(max-width:600px){.site-footer{margin-top:20px;padding:20px 12px 26px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div class="brandblock"><img class="brandlogo" src="sonry-logo.png" alt="SONRY Photography"><div class="brand">SONRY · FOTOMETRÍA</div><div class="subtitle">Fotómetro de luz ambiente</div></div><button class="iconbtn" id="settings" aria-label="Configuración">⚙</button></header>
+<div class="palettebar" aria-label="Paleta de interfaz">
+ <div class="palettechoices" role="group" aria-label="Seleccionar paleta">
+  <button class="palettechip" type="button" data-choice="pink" aria-label="Rosado" title="Rosado">🌸</button>
+  <button class="palettechip" type="button" data-choice="green" aria-label="Verde" title="Verde">🌿</button>
+  <button class="palettechip" type="button" data-choice="mono" aria-label="Negro y blanco" title="Negro y blanco">⚫</button>
+ </div>
+</div>
+
+<section class="photo">
+ <div class="preview" id="preview">
+  <div class="placeholder" id="placeholder"><span class="camera">◎</span><strong>Primero, mide la escena</strong><div class="subtitle">Activa la cámara o toma una fotografía</div></div>
+  <video id="video" class="hidden" autoplay playsinline muted></video>
+  <img id="photo" class="hidden" alt="Fotografía capturada">
+ </div>
+ <div class="photoactions"><button class="primary" id="openCamera">Abrir cámara</button><button class="outline" id="takePhoto" disabled>Tomar foto</button><button class="outline" id="upload">Elegir foto</button><input id="file" type="file" accept="image/*" capture="environment" class="hidden"></div>
+</section>
+
+<div class="wheels" aria-label="Parámetros de exposición">
+ <section class="wheel"><div class="wlabel">◷ <span style="margin-left:7px">TIEMPO</span></div><div class="selectionline"></div><div id="timeWheel" class="roller" tabindex="0" aria-label="Velocidad de obturación"></div></section>
+ <section class="wheel"><div class="wlabel" style="font-family:Georgia,serif;font-size:25px">ƒ</div><div class="selectionline"></div><div id="apWheel" class="roller" tabindex="0" aria-label="Diafragma"></div></section>
+ <section class="wheel"><div class="wlabel">ISO</div><div class="selectionline"></div><div id="isoWheel" class="roller" tabindex="0" aria-label="ISO"></div></section>
+</div>
+<div class="lockrow"><button id="lockTime" aria-label="Bloquear velocidad">🔓</button><button id="lockAp" aria-label="Bloquear diafragma">🔓</button><button id="lockIso" aria-label="Bloquear ISO">🔒</button></div>
+<p class="notice" style="margin:8px 2px">ISO inspirado en la Sony A7 IV: rango estándar 100–51 200 y valores ampliados desde ISO 50 hasta 204 800.</p>
+<div class="current"><span>Parámetros seleccionados</span><strong id="currentSettings">1/125 s · f/4 · ISO 100</strong></div>
+
+<div class="mainactions"><button class="primary" id="readBtn">Tomar lectura</button><button class="outline" id="reviewBtn">Revisar lectura</button></div>
+
+<section class="result" id="result">
+ <div class="resulthead"><strong>Lectura de luz</strong><span class="badge" id="readStatus">Sin medir</span></div>
+ <div class="big" id="resultTime">1/125 s</div>
+ <div class="small" id="resultText">Toma una fotografía para generar una estimación inicial. Después podrás bloquear ISO o diafragma y ajustar el resto.</div>
+ <div class="notice" id="notice">La foto de un celular suele tener exposición y procesamiento automáticos. Para una medición fiable, la app instalada deberá analizar la cámara en vivo y calibrarse; esta versión es un prototipo funcional de interfaz.</div>
+</section>
+
+<section id="manualPanel" class="result hidden">
+ <strong>Referencia de exposición</strong>
+ <p class="small">Si ya tienes una lectura de fotómetro, introduce aquí la exposición de referencia. Los cambios posteriores se compensarán automáticamente en tercios de paso.</p>
+ <div class="manual">
+  <div><label for="refTime">Velocidad de referencia</label><select id="refTime"></select></div>
+  <div><label for="refAp">Diafragma de referencia</label><select id="refAp"></select></div>
+  <div><label for="refIso">ISO de referencia</label><select id="refIso"></select></div>
+ </div>
+ <button class="primary" id="applyRef" style="width:100%;margin-top:12px">Usar esta referencia</button>
+</section>
+<p class="notice">Importante: una foto normal no permite conocer con exactitud la luz real porque el teléfono modifica automáticamente la exposición, el HDR y el tono. El modo de medición real requiere acceso a la cámara y calibración del dispositivo.</p>
+</main>
+<footer class="site-footer"><a href="https://www.sonry.org" target="_blank" rel="noopener noreferrer">www.sonry.org</a></footer>
+<script>
+(()=> {
+ const $=id=>document.getElementById(id);
+ const paletteNames={pink:'Rosado',green:'Verde',mono:'Negro y blanco'};
+ const paletteButtons=[...document.querySelectorAll('.palettechip')];
+ const storedPalette=localStorage.getItem('sonry-fotometria-palette');
+ const savedPalette=['pink','green','mono'].includes(storedPalette)?storedPalette:'mono';
+ function setPalette(value){
+   if(!['pink','green','mono'].includes(value)) value='mono';
+   document.body.dataset.palette=value;
+   localStorage.setItem('sonry-fotometria-palette',value);
+   paletteButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.choice===value)));
+   const current=$('paletteCurrent'); if(current) current.textContent=paletteNames[value]||paletteNames.mono;
+ }
+ paletteButtons.forEach(button=>button.addEventListener('click',()=>setPalette(button.dataset.choice)));
+ setPalette(savedPalette);
+ const stops={time:['30 s','25 s','20 s','15 s','13 s','10 s','8 s','6 s','5 s','4 s','3.2 s','2.5 s','2 s','1.6 s','1.3 s','1 s','0.8 s','0.6 s','0.5 s','0.4 s','1/3 s','1/4 s','1/5 s','1/6 s','1/8 s','1/10 s','1/13 s','1/15 s','1/20 s','1/25 s','1/30 s','1/40 s','1/50 s','1/60 s','1/80 s','1/100 s','1/125 s','1/160 s','1/200 s','1/250 s','1/320 s','1/400 s','1/500 s','1/640 s','1/800 s','1/1000 s','1/1250 s','1/1600 s','1/2000 s','1/2500 s','1/3200 s','1/4000 s','1/5000 s','1/6400 s','1/8000 s'],
+ ap:['1','1.1','1.2','1.4','1.6','1.8','2','2.2','2.5','2.8','3.2','3.5','4','4.5','5','5.6','6.3','7.1','8','9','10','11','13','14','16','18','20','22'],
+ iso:['50','64','80','100','125','160','200','250','320','400','500','640','800','1000','1250','1600','2000','2500','3200','4000','5000','6400','8000','10000','12800','16000','20000','25600','32000','40000','51200','64000','80000','102400','204800']
+ };
+ const state={time:'1/125 s',ap:'4',iso:'100'};
+ const locked={time:false,ap:false,iso:true};
+ let baseline=null, stream=null, photoBrightness=null;
+ const wheels={time:$('timeWheel'),ap:$('apWheel'),iso:$('isoWheel')};
+ function seconds(v){if(v.endsWith(' s')){let n=v.replace(' s','');if(n.includes('/'))return 1/Number(n.split('/')[1]);return Number(n)}return 1/Number(v.split('/')[1])}
+ function fmtTime(v){return v.replace(' s','')+(v.includes('/')?' s':' s')}
+ function ev(settings){return Math.log2((Number(settings.ap)**2/seconds(settings.time))*100/Number(settings.iso))}
+ function makeWheel(key){const el=wheels[key];el.innerHTML='';stops[key].forEach(v=>{const d=document.createElement('div');d.className='option';d.textContent=key==='time'?v.replace(' s','″'):(key==='ap'?'f/'+v:v);d.dataset.value=v;d.addEventListener('click',()=>{state[key]=v;updateFromChange(key);Object.keys(wheels).forEach(renderWheel);sync()});el.appendChild(d)});let scrollTimer;el.addEventListener('scroll',()=>{const opts=stops[key];const centerY=el.getBoundingClientRect().top+el.clientHeight/2;let nearestOption=null,nearestDistance=Infinity;el.querySelectorAll('.option').forEach(node=>{const rect=node.getBoundingClientRect();const distance=Math.abs((rect.top+rect.height/2)-centerY);if(distance<nearestDistance){nearestDistance=distance;nearestOption=node}});const v=nearestOption?.dataset.value;if(v&&v!==state[key]){state[key]=v;updateFromChange(key);Object.keys(wheels).forEach(highlight);sync();Object.keys(wheels).filter(k=>k!==key).forEach(k=>renderWheel(k))}clearTimeout(scrollTimer);scrollTimer=setTimeout(()=>{const selected=el.querySelector(`[data-value="${CSS.escape(state[key])}"]`);if(selected){const desired=selected.offsetTop-(el.clientHeight-selected.offsetHeight)/2;el.scrollTo({top:desired,behavior:'smooth'})}},140);},{passive:true});el.addEventListener('keydown',e=>{if(!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();let i=stops[key].indexOf(state[key]);i=Math.max(0,Math.min(stops[key].length-1,i+(e.key==='ArrowDown'?1:-1)));state[key]=stops[key][i];updateFromChange(key);Object.keys(wheels).forEach(renderWheel);sync()});}
+ function highlight(key){wheels[key].querySelectorAll('.option').forEach(d=>d.classList.toggle('active',d.dataset.value===state[key]))}
+ function renderWheel(key){highlight(key);const el=wheels[key],item=el.querySelector(`[data-value="${CSS.escape(state[key])}"]`);if(item){const target=item.offsetTop-(el.clientHeight-item.offsetHeight)/2;el.scrollTop=target;}}
+ function updateFromChange(changed){
+   if(!baseline)return;
+   // Mantén la exposición de referencia y compensa el cambio con otro parámetro desbloqueado.
+   // ISO bloqueado + cambio de diafragma => cambia el tiempo.
+   // ISO bloqueado + cambio de tiempo => cambia el diafragma.
+   const candidates = {
+     ap:   ['time','iso'],
+     iso:  ['time','ap'],
+     time: ['ap','iso']
+   };
+   const target = candidates[changed].find(k => !locked[k]);
+   if(!target)return;
+
+   const targetEV = ev(baseline);
+   if(target==='time'){
+     const requiredSeconds = (Number(state.ap)**2 * 100) / (Number(state.iso) * Math.pow(2,targetEV));
+     state.time = nearest('time', requiredSeconds);
+   }else if(target==='ap'){
+     const requiredF = Math.sqrt(Math.pow(2,targetEV) * Number(state.iso) * seconds(state.time) / 100);
+     state.ap = nearest('ap', requiredF);
+   }else if(target==='iso'){
+     const requiredISO = (Number(state.ap)**2 / seconds(state.time)) * 100 / Math.pow(2,targetEV);
+     state.iso = nearest('iso', requiredISO);
+   }
+ }
+ function nearest(key,val){return stops[key].reduce((best,v)=>{const n=key==='time'?seconds(v):Number(v);return Math.abs(Math.log2(n/val))<Math.abs(Math.log2((key==='time'?seconds(best):Number(best))/val))?v:best},stops[key][0])}
+ function sync(){ $('currentSettings').textContent=state.time+' · f/'+state.ap+' · ISO '+state.iso;Object.keys(wheels).forEach(k=>highlight(k));if(baseline){$('resultTime').textContent=state.time;$('resultText').textContent='Exposición equivalente a la referencia, ajustada a los valores seleccionados. La compensación se redondea a tercios de paso.'}else{$('resultText').textContent='Primero pulsa “Tomar lectura” o usa “Revisar lectura” para fijar una referencia. Después, al cambiar ISO, diafragma o velocidad, otro parámetro se ajustará automáticamente.'}}
+ function lockUI(key){locked[key]=!locked[key];$('lock'+key[0].toUpperCase()+key.slice(1)).textContent=locked[key]?'🔒':'🔓';$('lock'+key[0].toUpperCase()+key.slice(1)).classList.toggle('locked',locked[key])}
+ $('lockTime').addEventListener('click',()=>lockUI('time'));$('lockAp').addEventListener('click',()=>lockUI('ap'));$('lockIso').addEventListener('click',()=>lockUI('iso'));
+ function setSelect(id,arr,val){$(id).innerHTML=arr.map(v=>`<option ${v===val?'selected':''}>${v}</option>`).join('')}
+ setSelect('refTime',stops.time,state.time);setSelect('refAp',stops.ap,state.ap);setSelect('refIso',stops.iso,state.iso);
+ $('settings').addEventListener('click',()=>$('manualPanel').classList.toggle('hidden'));
+ $('applyRef').addEventListener('click',()=>{baseline={time:$('refTime').value,ap:$('refAp').value,iso:$('refIso').value};state.time=baseline.time;state.ap=baseline.ap;state.iso=baseline.iso;Object.keys(wheels).forEach(renderWheel);sync();$('readStatus').textContent='Referencia aplicada';$('resultText').textContent='Referencia establecida. Ahora cambia un parámetro: los demás se compensarán según el bloqueo.';$('manualPanel').classList.add('hidden')});
+ $('readBtn').addEventListener('click',()=>{if(!baseline){baseline={...state};$('readStatus').textContent='Referencia guardada';$('resultText').textContent='Se guardó la exposición actual como referencia de prueba. Para una lectura real, primero hay que conectar y calibrar el análisis de luz de la cámara.'}else{$('readStatus').textContent='Referencia activa';$('resultText').textContent='La lectura de referencia sigue activa. Los cambios de parámetros mantienen la exposición equivalente.'}sync()});
+ $('reviewBtn').addEventListener('click',()=>{$('manualPanel').classList.toggle('hidden')});
+ $('openCamera').addEventListener('click',async()=>{try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('No compatible');stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});$('video').srcObject=stream;$('video').classList.remove('hidden');$('photo').classList.add('hidden');$('placeholder').classList.add('hidden');$('takePhoto').disabled=false;$('readStatus').textContent='Cámara activa';$('resultText').textContent='Vista de cámara activa. Esta maqueta todavía no usa la exposición automática del teléfono como medición calibrada.'}catch(e){$('readStatus').textContent='Cámara no disponible';$('resultText').textContent='El navegador no permitió abrir la cámara. Prueba en Safari/Chrome con permiso de cámara y una conexión segura (HTTPS), o elige una foto.'}});
+ $('takePhoto').addEventListener('click',()=>{if(!stream)return;const video=$('video'),canvas=document.createElement('canvas');canvas.width=video.videoWidth||640;canvas.height=video.videoHeight||480;const ctx=canvas.getContext('2d');ctx.drawImage(video,0,0,canvas.width,canvas.height);$('photo').src=canvas.toDataURL('image/jpeg',.9);$('photo').classList.remove('hidden');video.classList.add('hidden');$('placeholder').classList.add('hidden');photoBrightness=brightness(ctx.getImageData(0,0,canvas.width,canvas.height).data);$('readStatus').textContent='Foto capturada';$('resultText').textContent='Brillo relativo de la foto: '+Math.round(photoBrightness*100)+'%. Este dato no basta para determinar por sí solo una exposición real porque el teléfono ajusta la imagen automáticamente.';});
+ $('upload').addEventListener('click',()=>$('file').click());$('file').addEventListener('change',()=>{const f=$('file').files[0];if(!f)return;const url=URL.createObjectURL(f);$('photo').src=url;$('photo').classList.remove('hidden');$('video').classList.add('hidden');$('placeholder').classList.add('hidden');const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=100;c.height=100;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,100,100);photoBrightness=brightness(x.getImageData(0,0,100,100).data);$('readStatus').textContent='Foto cargada';$('resultText').textContent='Brillo relativo: '+Math.round(photoBrightness*100)+'%. Estimación visual, no lectura calibrada de luz.'};img.src=url});
+ function brightness(d){let total=0,n=0;for(let i=0;i<d.length;i+=4){total+=(.2126*d[i]+.7152*d[i+1]+.0722*d[i+2])/255;n++}return n?total/n:0}
+ Object.keys(wheels).forEach(makeWheel);requestAnimationFrame(()=>{Object.keys(wheels).forEach(k=>renderWheel(k));sync()});
+})();
+</script>
+</body>
+</html>
