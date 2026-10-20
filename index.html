@@ -1,3 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1d1d1f">
+<title>SONRY · FOTOMETRÍA</title>
+<style>
+:root{color-scheme:dark;--bg:#111315;--panel:#2a2d30;--panel2:#4a4f55;--line:#24272a;--text:#f4f5f7;--muted:#b8bdc3;--accent:#b8bdc3;--soft:#34383d;--active:#4a4f55;--preview:#202428}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{max-width:540px;margin:auto;min-height:100dvh;padding:calc(18px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 28px}.brand{font-size:21px;font-weight:650;letter-spacing:.04em}.subtitle{font-size:12px;color:var(--muted);margin-top:4px}.iconbtn{border:0;background:none;color:var(--text);font-size:25px;padding:8px}
+.photo{border:1px solid #3b3b3e;background:#252527;border-radius:14px;overflow:hidden;margin-bottom:16px}.preview{height:180px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#39393c,#202022);position:relative;overflow:hidden}.preview video,.preview img{width:100%;height:100%;object-fit:cover}.placeholder{text-align:center;color:#b8b8bb;padding:20px}.placeholder .camera{font-size:35px;display:block;margin-bottom:8px}.photoactions{display:flex;gap:8px;padding:10px}.photoactions button{flex:1}
+button,select{font:inherit;color:var(--text);border:1px solid #525256;background:#38383b;border-radius:10px;padding:12px}button{cursor:pointer}button:active{transform:scale(.99)}.primary{background:#555558;border-color:#77777a;font-weight:650}.outline{background:transparent;border-color:#454549}
+.wheels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;border-radius:15px;overflow:hidden;background:#202022;border:1px solid #252527}
+.wheel{background:linear-gradient(#343436,#303032);min-width:0;position:relative;text-align:center}.wlabel{height:52px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;background:#262628}.roller{height:324px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;padding:135px 0;position:relative}.roller::-webkit-scrollbar{display:none}.option{height:54px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:clamp(17px,4.6vw,25px);color:#e6e6e7;user-select:none;cursor:pointer;white-space:nowrap}.option.active{background:#505053;font-weight:700;color:white}.selectionline{position:absolute;left:0;right:0;top:187px;height:54px;border-top:1px solid #202022;border-bottom:1px solid #202022;pointer-events:none}
+.lockrow{display:flex;justify-content:space-around;margin:0 0 18px;color:#888;font-size:22px}.lockrow button{border:0;background:transparent;padding:6px;color:#929295;font-size:19px}.lockrow button.locked{color:#fff}
+.current{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:13px 2px 18px;font-size:12px;color:var(--muted)}.current strong{color:var(--text);font-size:13px;text-align:right}
+.mainactions{display:grid;gap:10px;margin-top:22px}.mainactions button{width:100%;border-radius:30px;min-height:56px;font-size:18px}.result{margin-top:18px;border:1px solid #39393c;border-radius:14px;padding:15px;background:#262628}.resulthead{display:flex;justify-content:space-between;gap:10px;align-items:center}.badge{font-size:11px;color:#bdbdc0;border:1px solid #555559;padding:5px 8px;border-radius:20px}.big{font-size:27px;font-weight:700;margin:12px 0 4px}.small{font-size:12px;line-height:1.5;color:var(--muted)}.notice{margin-top:12px;font-size:11px;line-height:1.5;color:#a8a8ab}
+.hidden{display:none!important}.file-picker{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;clip-path:inset(50%);left:0;top:0}.manual{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.manual label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}.manual select{width:100%}
+
+header{position:relative;justify-content:center;text-align:center;margin-bottom:22px;min-height:78px}
+.brandblock{display:flex;flex-direction:column;align-items:center;gap:2px}
+.brandlogo{display:block;width:118px;height:auto;max-height:38px;object-fit:contain}
+.brand{font-size:20px;font-weight:700;letter-spacing:.12em}
+.subtitle{font-size:12px}
+.iconbtn{position:absolute;right:0;top:8px}
+.palettebar{display:flex;align-items:center;gap:8px;margin:-8px 0 16px}
+.palettebar label{font-size:12px;color:var(--muted);white-space:nowrap}
+.palettebar select{width:100%;min-width:0;padding:10px 12px;background:var(--panel);border-color:var(--panel2)}
+body[data-palette="pink"]{--bg:#5b3a4e;--panel:#e47a9d;--panel2:#f3a6bd;--line:#f7c6d0;--text:#23151c;--muted:#513440;--accent:#7c304f;--soft:#f7c6d0;--active:#d95f88;--preview:#f3a6bd;color-scheme:light}
+body[data-palette="green"]{--bg:#344e41;--panel:#588157;--panel2:#a3b18a;--line:#dad7cd;--text:#ffffff;--muted:#ffffff;--accent:#a3b18a;--soft:#3a5a40;--active:#588157;--preview:#3a5a40;color-scheme:dark}
+body[data-palette="mono"]{--bg:#111315;--panel:#2a2d30;--panel2:#4a4f55;--line:#24272a;--text:#f4f5f7;--muted:#b8bdc3;--accent:#b8bdc3;--soft:#34383d;--active:#4a4f55;--preview:#202428;color-scheme:dark}
+.photo{background:var(--panel);border-color:var(--panel2)}
+.preview{background:linear-gradient(135deg,var(--panel2),var(--preview))}
+button,select{color:var(--text);border-color:var(--panel2);background:var(--soft)}
+.primary{background:var(--active);border-color:var(--panel2);color:var(--text)}
+.outline{background:transparent;border-color:var(--panel2)}
+.wheels{background:var(--bg);border-color:var(--line)}
+.wheel{background:linear-gradient(var(--panel),var(--soft))}
+.wlabel{background:var(--panel)}
+.option{color:var(--text);-webkit-text-fill-color:var(--text);text-shadow:0 1px 2px rgba(0,0,0,.18)}
+.option.active{background:var(--active);color:#fff;-webkit-text-fill-color:#fff}
+.subtitle{color:var(--text)}
+.placeholder{color:#fff}
+.placeholder .subtitle{color:#fff;font-weight:500}
+.wlabel{color:#fff}
+body[data-palette="green"] .roller .option{color:#fff;-webkit-text-fill-color:#fff}
+body[data-palette="green"] .wlabel{color:#fff}
+body[data-palette="green"] .current,body[data-palette="green"] .notice,body[data-palette="green"] .small{color:#fff}
+.selectionline{border-color:var(--line)}
+.result{background:var(--panel);border-color:var(--panel2)}
+.badge{color:var(--text);border-color:var(--panel2)}
+@media(max-height:760px){.roller{height:270px;padding:108px 0}.selectionline{top:160px}.option{height:54px}}
+
+/* Ajustes de legibilidad y selector centrado */
+header{color:#fff}
+.brand{color:#fff}
+header .subtitle{color:#fff!important}
+.placeholder,.placeholder strong,.placeholder .subtitle,.placeholder .camera{color:#fff!important;-webkit-text-fill-color:#fff}
+.wlabel{color:#fff!important;-webkit-text-fill-color:#fff}
+.option,.option.active{color:#fff!important;-webkit-text-fill-color:#fff}
+.palettebar{display:flex;justify-content:center;align-items:center;width:100%;margin:0 auto 16px;padding:0}
+.palettechoices{display:flex;justify-content:center;align-items:center;gap:14px;width:100%}
+.palettechip{display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border-radius:50%;font-size:25px;line-height:1;background:transparent;border:2px solid transparent;cursor:pointer}
+.palettechip[aria-pressed="true"],.palettechip.active{border-color:#fff;background:rgba(255,255,255,.12);box-shadow:0 0 0 2px rgba(255,255,255,.18)}
+body[data-palette="pink"]{--text:#fff;--muted:#fff;color:#fff}
+body[data-palette="pink"] .subtitle,
+body[data-palette="pink"] .small,
+body[data-palette="pink"] .notice,
+body[data-palette="pink"] .palettecurrent,
+body[data-palette="pink"] .placeholder,
+body[data-palette="pink"] .placeholder strong,
+body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-text-fill-color:#fff}
+
+.site-footer{width:100%;text-align:center;padding:24px 16px 30px;margin-top:28px;border-top:1px solid var(--line);box-sizing:border-box}
+.site-footer a{color:var(--text);text-decoration:none;font-size:13px;letter-spacing:.12em;opacity:.9}
+.site-footer a:hover{opacity:1;text-decoration:underline}
+@media(max-width:600px){.site-footer{margin-top:20px;padding:20px 12px 26px}}
+</style>
+
+<style>
+.home-screen{min-height:100vh;min-height:100dvh;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;padding:28px 22px;box-sizing:border-box}
+.home-center{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:30px}
+.home-logo{display:block;width:min(88%,520px);height:auto;object-fit:contain}
+.home-start{width:min(100%,440px);min-height:58px;padding:16px 20px;border:1px solid #fff;border-radius:2px;background:#fff;color:#000;font-size:clamp(14px,3.7vw,17px);font-weight:800;letter-spacing:.07em;cursor:pointer}
+.home-start:active{transform:scale(.99)}
+.home-url{color:#fff;text-decoration:none;font-size:clamp(11px,3vw,14px);letter-spacing:.17em;line-height:1.8}
+.photometer-app{display:none}
+body.photometer-open{background:var(--bg)}
+body.photometer-open .home-screen{display:none}
+body.photometer-open .photometer-app{display:block}
+@media(min-width:700px){.home-center{gap:34px}.home-logo{width:min(82%,600px)}}
+</style>
+
+
+
+
+
+
+
+
+
+
+<style id="sonry-image-cover">
+html,body{margin:0;min-height:100%;background:#000}
+.home-screen{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  width:100%;height:100vh;height:100dvh;
+  background:#000;overflow:hidden;padding:0;margin:0
+}
+.cover-frame{
+  position:relative;
+  width:min(100vw,177.8646vh);
+  width:min(100vw,177.8646dvh);
+  aspect-ratio:1366 / 768;
+  flex:none;overflow:hidden
+}
+.cover-image{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain}
+.cover-start{
+  position:absolute;left:44.1%;top:56.2%;
+  transform:translate(-50%,-50%);
+  min-width:0;min-height:0;
+  padding:5px 13px;
+  border:1px solid #858585;border-radius:0;
+  background:#bdbdbd;color:#111;
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(8px,0.75vw,11px);font-weight:700;
+  line-height:1.1;letter-spacing:.07em;
+  cursor:pointer;box-shadow:none
+}
+.cover-start:active{transform:translate(-50%,-50%) scale(.98)}
+.photometer-app{display:none}
+body.photometer-open .home-screen{display:none}
+body.photometer-open .photometer-app{display:block}
+@media(max-width:600px){
+ .cover-start{padding:5px 11px;font-size:9px}
+}
+</style>
+
+
+<style id="sonry-intro-styles">
+.sonry-intro{
+  position:fixed;inset:0;z-index:20000;
+  display:flex;align-items:center;justify-content:center;
+  background:#000;opacity:1;visibility:visible;
+  animation:sonryIntroFade 250ms ease-in-out 3.25s forwards;
+  pointer-events:none;
+}
+.sonry-intro-logo{
+  display:block;width:clamp(155px, 43vw, 285px);max-width:68vw;height:auto;
+  object-fit:contain;opacity:0;
+  animation:sonryLogoGrow 3.25s cubic-bezier(.2,.75,.25,1) 150ms forwards;
+}
+@keyframes sonryLogoGrow{
+  0%{opacity:0;transform:scale(.48)}
+  100%{opacity:1;transform:scale(1)}
+}
+@keyframes sonryIntroFade{
+  0%{opacity:1;visibility:visible}
+  99%{opacity:0;visibility:visible}
+  100%{opacity:0;visibility:hidden}
+}
+@media(min-width:700px){
+  .sonry-intro-logo{width:clamp(190px, 23vw, 300px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .sonry-intro-logo{animation:sonryLogoGrow 3.25s ease 150ms forwards}
+  .sonry-intro{animation:sonryIntroFade 250ms ease-in-out 1.25s forwards}
+}
+</style>
+
+
+<style id="sonry-skip-home-cover">
+#homeScreen.home-screen{display:none!important}
+body:not(.photometer-open) .photometer-app{display:none!important}
+body.photometer-open .photometer-app{display:block!important}
+</style>
+
+</head>
+<body>
+
+<div id="sonryIntro" class="sonry-intro" aria-label="SONRY Photography">
+  <img src="sonry-intro-logo.png" alt="SONRY Photography" class="sonry-intro-logo">
+</div>
+
+<section id="homeScreen" class="home-screen" aria-label="Inicio de SONRY Fotometría">
+  <div class="cover-frame">
+    <img class="cover-image" src="sonry-portada.png" alt="Portada SONRY Photography">
+    <button id="startPhotometer" class="cover-start" type="button" aria-label="Iniciar fotómetro digital">INICIAR</button>
+  </div>
+</section>
+
+<main class="app photometer-app" id="photometerApp">
+<header><div class="brandblock"><div class="brand">SONRY · FOTOMETRÍA</div><div class="subtitle">Fotómetro de luz ambiente</div></div></header>
+<div class="palettebar" aria-label="Paleta de interfaz">
+ <div class="palettechoices" role="group" aria-label="Seleccionar paleta">
+  <button class="palettechip" type="button" data-choice="pink" aria-label="Rosado" title="Rosado">🌸</button>
+  <button class="palettechip" type="button" data-choice="green" aria-label="Verde" title="Verde">🌿</button>
+  <button class="palettechip" type="button" data-choice="mono" aria-label="Negro y blanco" title="Negro y blanco">⚫</button>
+ </div>
+</div>
+
+<section class="photo">
+ <div class="preview" id="preview">
+  <div class="placeholder" id="placeholder"><span class="camera">◎</span><strong>Primero, mide la escena</strong><div class="subtitle">Activa la cámara o toma una fotografía</div></div>
+  <video id="video" class="hidden" autoplay playsinline muted></video>
+  <img id="photo" class="hidden" alt="Fotografía capturada">
+ </div>
+ <div class="photoactions">
+  <button class="primary" id="openCamera" type="button">Tomar fotografía</button>
+  <button class="outline" id="upload" type="button">Elegir foto</button>
+  <input id="cameraFile" type="file" accept="image/*" capture="environment" class="file-picker" aria-label="Capturar fotografía">
+  <input id="galleryFile" type="file" accept="image/*,.heic,.heif" class="file-picker" aria-label="Elegir fotografía de la galería">
+</div>
+</section>
+
+<div class="wheels" aria-label="Parámetros de exposición">
+ <section class="wheel"><div class="wlabel">◷ <span style="margin-left:7px">TIEMPO</span></div><div class="selectionline"></div><div id="timeWheel" class="roller" tabindex="0" aria-label="Velocidad de obturación"></div></section>
+ <section class="wheel"><div class="wlabel" style="font-family:Georgia,serif;font-size:25px">ƒ</div><div class="selectionline"></div><div id="apWheel" class="roller" tabindex="0" aria-label="Diafragma"></div></section>
+ <section class="wheel"><div class="wlabel">ISO</div><div class="selectionline"></div><div id="isoWheel" class="roller" tabindex="0" aria-label="ISO"></div></section>
+</div>
+<div class="lockrow"><button id="lockTime" aria-label="Bloquear velocidad">🔓</button><button id="lockAp" aria-label="Bloquear diafragma">🔓</button><button id="lockIso" aria-label="Bloquear ISO">🔒</button></div>
+<p class="notice" style="margin:8px 2px">ISO inspirado en la Sony A7 IV: rango estándar 100–51 200 y valores ampliados desde ISO 50 hasta 204 800.</p>
+<div class="current"><span>Parámetros seleccionados</span><strong id="currentSettings">1/125 s · f/4 · ISO 100</strong></div>
+
+<div class="mainactions"><button class="primary" id="readBtn">Tomar lectura</button><button class="outline" id="reviewBtn">Revisar lectura</button></div>
+
+<section class="result" id="result">
+ <div class="resulthead"><strong>Lectura de luz</strong><span class="badge" id="readStatus">Sin medir</span></div>
+ <div class="big" id="resultTime">—</div>
+ <div class="small" id="resultText">Toma una fotografía. SONRY intentará leer los metadatos EXIF originales y cargar velocidad, diafragma e ISO como referencia para tus cálculos.</div>
+ <div class="small" id="liveBrightness" style="margin-top:10px;font-weight:650">Esperando una fotografía…</div>
+ <div class="notice" id="notice">Los metadatos EXIF dependen de la cámara y del archivo. Si la foto no incluye alguno de estos datos, SONRY no lo inventará: podrás introducir una referencia manualmente.</div>
+</section>
+
+<section id="manualPanel" class="result hidden">
+ <strong>Referencia de exposición</strong>
+ <p class="small">Si la foto no contiene todos los metadatos, puedes introducir aquí una referencia manual. Los cambios posteriores se compensarán según el parámetro que dejes desbloqueado.</p>
+ <div class="manual">
+  <div><label for="refTime">Velocidad de referencia</label><select id="refTime"></select></div>
+  <div><label for="refAp">Diafragma de referencia</label><select id="refAp"></select></div>
+  <div><label for="refIso">ISO de referencia</label><select id="refIso"></select></div>
+ </div>
+ <button class="primary" id="applyRef" style="width:100%;margin-top:12px">Usar esta referencia</button>
+</section>
+<p class="notice">La fotografía sirve como punto de partida. Al cambiar los parámetros, SONRY calcula equivalencias de exposición para tu cámara; no modifica la foto original ni controla los ajustes físicos de la Sony.</p>
+</main>
+<footer class="site-footer"><a href="https://www.sonry.org" target="_blank" rel="noopener noreferrer">www.sonry.org</a></footer>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script>
 (()=> {
@@ -31,6 +281,9 @@
  function renderWheel(key){highlight(key);const el=wheels[key],item=el.querySelector(`[data-value="${CSS.escape(state[key])}"]`);if(item){const target=item.offsetTop-(el.clientHeight-item.offsetHeight)/2;el.scrollTop=target;}}
  function updateFromChange(changed){
    if(!baseline)return;
+   // Mantén la exposición de referencia y compensa el cambio con otro parámetro desbloqueado.
+   // ISO bloqueado + cambio de diafragma => cambia el tiempo.
+   // ISO bloqueado + cambio de tiempo => cambia el diafragma.
    const candidates = {
      ap:   ['time','iso'],
      iso:  ['time','ap'],
@@ -53,25 +306,19 @@
  }
  function nearest(key,val){return stops[key].reduce((best,v)=>{const n=key==='time'?seconds(v):Number(v);return Math.abs(Math.log2(n/val))<Math.abs(Math.log2((key==='time'?seconds(best):Number(best))/val))?v:best},stops[key][0])}
  function sync(){ $('currentSettings').textContent=state.time+' · f/'+state.ap+' · ISO '+state.iso;Object.keys(wheels).forEach(k=>highlight(k));if(baseline){$('resultTime').textContent=state.time;$('resultText').textContent='Exposición equivalente a la referencia, ajustada a los valores seleccionados. La compensación se redondea a tercios de paso.'}else{$('resultText').textContent='Primero pulsa “Tomar lectura” o usa “Revisar lectura” para fijar una referencia. Después, al cambiar ISO, diafragma o velocidad, otro parámetro se ajustará automáticamente.'}}
- function lockUI(key){const button=$('lock'+key[0].toUpperCase()+key.slice(1));locked[key]=!locked[key];button.classList.toggle('locked',locked[key]);button.setAttribute('aria-pressed',String(locked[key]));button.setAttribute('aria-label',(key==='time'?'Velocidad':key==='ap'?'Diafragma':'ISO')+(locked[key]?': bloqueado':': desbloqueado'));button.querySelector('.lockicon').textContent=locked[key]?'🔒':'🔓';button.querySelector('.lockstate').textContent=locked[key]?'FIJO':'LIBRE'}
+ function lockUI(key){locked[key]=!locked[key];$('lock'+key[0].toUpperCase()+key.slice(1)).textContent=locked[key]?'🔒':'🔓';$('lock'+key[0].toUpperCase()+key.slice(1)).classList.toggle('locked',locked[key])}
  $('lockTime').addEventListener('click',()=>lockUI('time'));$('lockAp').addEventListener('click',()=>lockUI('ap'));$('lockIso').addEventListener('click',()=>lockUI('iso'));
  function setSelect(id,arr,val){$(id).innerHTML=arr.map(v=>`<option ${v===val?'selected':''}>${v}</option>`).join('')}
  setSelect('refTime',stops.time,state.time);setSelect('refAp',stops.ap,state.ap);setSelect('refIso',stops.iso,state.iso);
- $('applyRef').addEventListener('click',()=>{baseline={time:$('refTime').value,ap:$('refAp').value,iso:$('refIso').value};state.time=baseline.time;state.ap=baseline.ap;state.iso=baseline.iso;Object.keys(wheels).forEach(renderWheel);sync();$('readStatus').textContent='Referencia aplicada';$('resultText').textContent='Referencia establecida. Ahora cambia un parámetro: los demás se compensarán según el bloqueo.';$('manualPanel').classList.add('hidden')});$('readBtn').addEventListener('click',()=>{
+ $('applyRef').addEventListener('click',()=>{baseline={time:$('refTime').value,ap:$('refAp').value,iso:$('refIso').value};state.time=baseline.time;state.ap=baseline.ap;state.iso=baseline.iso;Object.keys(wheels).forEach(renderWheel);sync();$('readStatus').textContent='Referencia aplicada';$('resultText').textContent='Referencia establecida. Ahora cambia un parámetro: los demás se compensarán según el bloqueo.';$('manualPanel').classList.add('hidden')});
+ $('readBtn').addEventListener('click',()=>{
    if(!baseline){$('readStatus').textContent='Sin referencia';$('resultText').textContent='Primero toma una fotografía con metadatos o usa “Revisar lectura” para introducir los parámetros manualmente.';return}
    sync();$('readStatus').textContent='Referencia activa';
  });
  $('reviewBtn').addEventListener('click',()=>{$('manualPanel').classList.toggle('hidden')});
-
- // Corrección para dispositivos iOS: aseguramos la ejecución del click nativo sin bloqueos de seguridad de Safari
- $('openCamera').addEventListener('click', (e) => {
-   e.preventDefault();
-   $('cameraFile').click();
- });
- $('upload').addEventListener('click', (e) => {
-   e.preventDefault();
-   $('galleryFile').click();
- });
+ // Selectores separados para evitar que capture fuerce la cámara al elegir de galería.
+ $('openCamera').addEventListener('click',()=> $('cameraFile').click());
+ $('upload').addEventListener('click',()=> $('galleryFile').click());
 
  async function processSelectedPhoto(input){
    const f=input.files && input.files[0]; if(!f)return;
@@ -82,7 +329,6 @@
    try{
      let meta=null;
      if(window.exifr && typeof window.exifr.parse==='function'){
-       // Se añade una tolerancia mayor para lectura asíncrona segura en Safari
        meta=await window.exifr.parse(f,{
           tiff:true, exif:true, iptc:false, icc:false, xmp:false, gps:false, translateValues:true
         });
@@ -111,19 +357,59 @@
      } else {
        if(timeValue||apValue||isoValue){baseline={time:state.time,ap:state.ap,iso:state.iso};Object.keys(wheels).forEach(renderWheel);sync();}
        $('readStatus').textContent='EXIF incompleto';
-       $('resultTime').textContent=[timeValue\vert{}\vert{}'—',apValue?'f/'+apValue:'—',isoValue?'ISO '+isoValue:'—'].join(' · ');$('resultText').textContent='No se encontraron todos los datos de exposición en este archivo. '+(input.id==='cameraFile'?'En iPhone, la cámara del navegador a veces comprime la imagen y omite los metadatos EXIF. Prueba seleccionando la foto directamente desde tu fototeca con "Elegir foto". ':'')+(found.length?'Datos encontrados: '+found.join(', ')+'. ':'')+'También puedes introducir los valores que falten en “Revisar lectura”.';
+       $('resultTime').textContent=[timeValue||'—',apValue?'f/'+apValue:'—',isoValue?'ISO '+isoValue:'—'].join(' · ');
+       $('resultText').textContent='No se encontraron todos los datos de exposición en este archivo. '+(input.id==='cameraFile'?'En iPhone, la cámara del navegador puede entregar una copia sin todos los EXIF. Guarda la foto en Fotos y usa “Elegir foto” para intentar leer el original. ':'')+(found.length?'Datos encontrados: '+found.join(', ')+'. ':'')+'Prueba con la foto original, no una captura de pantalla ni una imagen reenviada por una app. También puedes introducir los valores que falten en “Revisar lectura”.';
        $('liveBrightness').textContent='EXIF disponibles: '+(found.length?found.join(' · '):'ninguno de los parámetros principales');
      }
    }catch(err){
-     $('readStatus').textContent='No se pudieron leer los EXIF';$('resultTime').textContent='—';$('resultText').textContent='La foto se cargó correctamente, pero el formato HEIC/JPEG de iOS requiere ser seleccionado desde la galería si la captura directa de Safari omitió los metadatos. Si lo prefieres, introduce los valores manualmente en “Revisar lectura”.';
+     $('readStatus').textContent='No se pudieron leer los EXIF';$('resultTime').textContent='—';
+     $('resultText').textContent='La foto se cargó, pero no se pudieron interpretar sus metadatos. Esta versión usa un lector EXIF más completo. Si sigue ocurriendo en iPhone, selecciona la foto original desde Fotos/Archivos (no una captura de pantalla ni una imagen descargada de redes). Si el archivo no contiene EXIF, introduce los valores en “Revisar lectura”.';
      $('liveBrightness').textContent='Archivo: '+f.name;
    }
    input.value='';
  }
- $('cameraFile').addEventListener('change',()=>processSelectedPhoto($('cameraFile')));$('galleryFile').addEventListener('change',()=>processSelectedPhoto($('galleryFile')));$('startPhotometer').addEventListener('click',()=>{
+ $('cameraFile').addEventListener('change',()=>processSelectedPhoto($('cameraFile')));
+ $('galleryFile').addEventListener('change',()=>processSelectedPhoto($('galleryFile')));
+ $('startPhotometer').addEventListener('click',()=>{
    document.body.classList.add('photometer-open');
    window.scrollTo({top:0,behavior:'instant'});
  });
  Object.keys(wheels).forEach(makeWheel);requestAnimationFrame(()=>{Object.keys(wheels).forEach(k=>renderWheel(k));sync()});
 })();
 </script>
+
+
+
+
+
+
+
+<script id="sonry-intro-transition">
+(function(){
+  function startIntro(){
+    // Mostrar el fotómetro por debajo desde el inicio; el logo negro lo tapa
+    // completamente hasta terminar su animación. Así nunca aparece la portada.
+    document.body.classList.add('photometer-open');
+    window.scrollTo(0,0);
+    var intro=document.getElementById('sonryIntro');
+    if(!intro) return;
+    var finished=false;
+    function finish(){
+      if(finished) return;
+      finished=true;
+      intro.style.display='none';
+    }
+    intro.addEventListener('animationend',function(e){
+      if(e.target===intro && e.animationName==='sonryIntroFade') finish();
+    });
+    // Respaldo por si Safari no dispara animationend.
+    window.setTimeout(finish,3600);
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',startIntro,{once:true});
+  } else startIntro();
+})();
+</script>
+
+</body>
+</html>
