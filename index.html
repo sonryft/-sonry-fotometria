@@ -14,7 +14,15 @@ header{display:flex;align-items:center;justify-content:space-between;margin:8px 
 button,select{font:inherit;color:var(--text);border:1px solid #525256;background:#38383b;border-radius:10px;padding:12px}button{cursor:pointer}button:active{transform:scale(.99)}.primary{background:#555558;border-color:#77777a;font-weight:650}.outline{background:transparent;border-color:#454549}
 .wheels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;border-radius:15px;overflow:hidden;background:#202022;border:1px solid #252527}
 .wheel{background:linear-gradient(#343436,#303032);min-width:0;position:relative;text-align:center}.wlabel{height:52px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;background:#262628}.roller{height:324px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;padding:135px 0;position:relative}.roller::-webkit-scrollbar{display:none}.option{height:54px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:clamp(17px,4.6vw,25px);color:#e6e6e7;user-select:none;cursor:pointer;white-space:nowrap}.option.active{background:#505053;font-weight:700;color:white}.selectionline{position:absolute;left:0;right:0;top:187px;height:54px;border-top:1px solid #202022;border-bottom:1px solid #202022;pointer-events:none}
-.lockrow{display:flex;justify-content:space-around;margin:0 0 18px;color:#888;font-size:22px}.lockrow button{border:0;background:transparent;padding:6px;color:#929295;font-size:19px}.lockrow button.locked{color:#fff}
+.lockrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0 18px}
+.lockrow button{display:flex;align-items:center;justify-content:center;gap:7px;min-width:0;min-height:42px;padding:7px 5px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--muted);font-size:12px;font-weight:650;transition:background .18s,border-color .18s,color .18s,opacity .18s}
+.lockrow button .lockicon{font-size:18px;line-height:1;filter:grayscale(1);opacity:.68}
+.lockrow button .lockstate{font-size:10px;letter-spacing:.04em}
+.lockrow button.locked{color:#fff;background:var(--active);border-color:var(--panel2);box-shadow:inset 0 0 0 1px var(--accent)}
+.lockrow button.locked .lockicon{opacity:1}
+.lockrow button:not(.locked){color:var(--muted);background:var(--soft);border-color:var(--line);opacity:.78}
+.lockrow button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:380px){.lockrow button{gap:4px;font-size:11px}.lockrow button .lockicon{font-size:16px}}
 .current{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:13px 2px 18px;font-size:12px;color:var(--muted)}.current strong{color:var(--text);font-size:13px;text-align:right}
 .mainactions{display:grid;gap:10px;margin-top:22px}.mainactions button{width:100%;border-radius:30px;min-height:56px;font-size:18px}.result{margin-top:18px;border:1px solid #39393c;border-radius:14px;padding:15px;background:#262628}.resulthead{display:flex;justify-content:space-between;gap:10px;align-items:center}.badge{font-size:11px;color:#bdbdc0;border:1px solid #555559;padding:5px 8px;border-radius:20px}.big{font-size:27px;font-weight:700;margin:12px 0 4px}.small{font-size:12px;line-height:1.5;color:var(--muted)}.notice{margin-top:12px;font-size:11px;line-height:1.5;color:#a8a8ab}
 .hidden{display:none!important}.file-picker{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;clip-path:inset(50%);left:0;top:0}.manual{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.manual label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}.manual select{width:100%}
@@ -222,8 +230,11 @@ body.photometer-open .photometer-app{display:block!important}
  <section class="wheel"><div class="wlabel" style="font-family:Georgia,serif;font-size:25px">ƒ</div><div class="selectionline"></div><div id="apWheel" class="roller" tabindex="0" aria-label="Diafragma"></div></section>
  <section class="wheel"><div class="wlabel">ISO</div><div class="selectionline"></div><div id="isoWheel" class="roller" tabindex="0" aria-label="ISO"></div></section>
 </div>
-<div class="lockrow"><button id="lockTime" aria-label="Bloquear velocidad">🔓</button><button id="lockAp" aria-label="Bloquear diafragma">🔓</button><button id="lockIso" aria-label="Bloquear ISO">🔒</button></div>
-<p class="notice" style="margin:8px 2px">ISO inspirado en la Sony A7 IV: rango estándar 100–51 200 y valores ampliados desde ISO 50 hasta 204 800.</p>
+<div class="lockrow" aria-label="Bloqueo de parámetros">
+ <button id="lockTime" type="button" aria-label="Velocidad: desbloqueada" aria-pressed="false"><span class="lockicon" aria-hidden="true">🔓</span><span class="lockstate">LIBRE</span></button>
+ <button id="lockAp" type="button" aria-label="Diafragma: desbloqueado" aria-pressed="false"><span class="lockicon" aria-hidden="true">🔓</span><span class="lockstate">LIBRE</span></button>
+ <button id="lockIso" type="button" class="locked" aria-label="ISO: bloqueado" aria-pressed="true"><span class="lockicon" aria-hidden="true">🔒</span><span class="lockstate">FIJO</span></button>
+</div>
 <div class="current"><span>Parámetros seleccionados</span><strong id="currentSettings">1/125 s · f/4 · ISO 100</strong></div>
 
 <div class="mainactions"><button class="primary" id="readBtn">Tomar lectura</button><button class="outline" id="reviewBtn">Revisar lectura</button></div>
@@ -307,7 +318,7 @@ body.photometer-open .photometer-app{display:block!important}
  }
  function nearest(key,val){return stops[key].reduce((best,v)=>{const n=key==='time'?seconds(v):Number(v);return Math.abs(Math.log2(n/val))<Math.abs(Math.log2((key==='time'?seconds(best):Number(best))/val))?v:best},stops[key][0])}
  function sync(){ $('currentSettings').textContent=state.time+' · f/'+state.ap+' · ISO '+state.iso;Object.keys(wheels).forEach(k=>highlight(k));if(baseline){$('resultTime').textContent=state.time;$('resultText').textContent='Exposición equivalente a la referencia, ajustada a los valores seleccionados. La compensación se redondea a tercios de paso.'}else{$('resultText').textContent='Primero pulsa “Tomar lectura” o usa “Revisar lectura” para fijar una referencia. Después, al cambiar ISO, diafragma o velocidad, otro parámetro se ajustará automáticamente.'}}
- function lockUI(key){locked[key]=!locked[key];$('lock'+key[0].toUpperCase()+key.slice(1)).textContent=locked[key]?'🔒':'🔓';$('lock'+key[0].toUpperCase()+key.slice(1)).classList.toggle('locked',locked[key])}
+ function lockUI(key){const button=$('lock'+key[0].toUpperCase()+key.slice(1));locked[key]=!locked[key];button.classList.toggle('locked',locked[key]);button.setAttribute('aria-pressed',String(locked[key]));button.setAttribute('aria-label',(key==='time'?'Velocidad':key==='ap'?'Diafragma':'ISO')+(locked[key]?': bloqueado':': desbloqueado'));button.querySelector('.lockicon').textContent=locked[key]?'🔒':'🔓';button.querySelector('.lockstate').textContent=locked[key]?'FIJO':'LIBRE'}
  $('lockTime').addEventListener('click',()=>lockUI('time'));$('lockAp').addEventListener('click',()=>lockUI('ap'));$('lockIso').addEventListener('click',()=>lockUI('iso'));
  function setSelect(id,arr,val){$(id).innerHTML=arr.map(v=>`<option ${v===val?'selected':''}>${v}</option>`).join('')}
  setSelect('refTime',stops.time,state.time);setSelect('refAp',stops.ap,state.ap);setSelect('refIso',stops.iso,state.iso);
