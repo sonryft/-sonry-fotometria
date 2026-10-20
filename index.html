@@ -96,7 +96,7 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
   <video id="video" class="hidden" autoplay playsinline muted></video>
   <img id="photo" class="hidden" alt="Fotografía capturada">
  </div>
- <div class="photoactions"><button class="primary" id="openCamera">Tomar fotografía</button><button class="outline" id="upload">Elegir foto</button><input id="file" type="file" accept="image/*" capture="environment" class="hidden"></div>
+ <div class="photoactions"><button class="primary" id="openCamera">Tomar fotografía</button><button class="outline" id="upload">Elegir foto</button><input id="file" type="file" accept="image/*,.heic,.heif" capture="environment" class="hidden"></div>
 </section>
 
 <div class="wheels" aria-label="Parámetros de exposición">
@@ -131,7 +131,7 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
 <p class="notice">La fotografía sirve como punto de partida. Al cambiar los parámetros, SONRY calcula equivalencias de exposición para tu cámara; no modifica la foto original ni controla los ajustes físicos de la Sony.</p>
 </main>
 <footer class="site-footer"><a href="https://www.sonry.org" target="_blank" rel="noopener noreferrer">www.sonry.org</a></footer>
-<script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script>
 (()=> {
  const $=id=>document.getElementById(id);
@@ -211,7 +211,15 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
    try{
      let meta=null;
      if(window.exifr && typeof window.exifr.parse==='function'){
-       meta=await window.exifr.parse(f,['ExposureTime','FNumber','ISO','FocalLength','Make','Model','DateTimeOriginal','ShutterSpeedValue','ApertureValue']);
+       meta=await window.exifr.parse(f,['ExposureTime','FNumber','ISO','FocalLength','Make','Model','DateTimeOriginal','ShutterSpeedValue','ApertureValue'],{
+         tiff:true,
+         exif:true,
+         iptc:false,
+         icc:false,
+         xmp:false,
+         gps:false,
+         translateValues:true
+       });
      }
      if(!meta) meta={};
      const exp=Number(meta.ExposureTime);
@@ -243,7 +251,7 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
      }
    }catch(err){
      $('readStatus').textContent='No se pudieron leer los EXIF';$('resultTime').textContent='—';
-     $('resultText').textContent='La fotografía se cargó, pero el navegador no pudo leer sus metadatos. Prueba con un JPEG original o introduce los parámetros manualmente en “Revisar lectura”.';
+     $('resultText').textContent='La foto se cargó, pero no se pudieron interpretar sus metadatos. Esta versión usa un lector EXIF más completo. Si sigue ocurriendo en iPhone, selecciona la foto original desde Fotos/Archivos (no una captura de pantalla ni una imagen descargada de redes). Si el archivo no contiene EXIF, introduce los valores en “Revisar lectura”.';
      $('liveBrightness').textContent='Archivo: '+f.name;
    }
    $('file').value='';
