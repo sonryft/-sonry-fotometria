@@ -112,9 +112,10 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
 
 <section class="result" id="result">
  <div class="resulthead"><strong>Lectura de luz</strong><span class="badge" id="readStatus">Sin medir</span></div>
- <div class="big" id="resultTime">1/125 s</div>
- <div class="small" id="resultText">Toma una fotografía para generar una estimación inicial. Después podrás bloquear ISO o diafragma y ajustar el resto.</div>
- <div class="notice" id="notice">La foto de un celular suele tener exposición y procesamiento automáticos. Para una medición fiable, la app instalada deberá analizar la cámara en vivo y calibrarse; esta versión es un prototipo funcional de interfaz.</div>
+ <div class="big" id="resultTime">—</div>
+ <div class="small" id="resultText">Activa la cámara para analizar continuamente el brillo de la imagen y obtener una estimación experimental.</div>
+ <div class="small" id="liveBrightness" style="margin-top:10px;font-weight:650">Brillo del encuadre: esperando cámara…</div>
+ <div class="notice" id="notice">Estimación experimental basada en el brillo de la vista previa, no en datos reales del sensor. La exposición automática, HDR y procesamiento del iPhone pueden alterar el resultado; no sustituye un fotómetro calibrado.</div>
 </section>
 
 <section id="manualPanel" class="result hidden">
@@ -152,7 +153,7 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
  };
  const state={time:'1/125 s',ap:'4',iso:'100'};
  const locked={time:false,ap:false,iso:true};
- let baseline=null, stream=null, photoBrightness=null;
+ let baseline=null, stream=null, photoBrightness=null, liveMeterTimer=null, liveBrightness=null, lastSuggestedTime=null;
  const wheels={time:$('timeWheel'),ap:$('apWheel'),iso:$('isoWheel')};
  function seconds(v){if(v.endsWith(' s')){let n=v.replace(' s','');if(n.includes('/'))return 1/Number(n.split('/')[1]);return Number(n)}return 1/Number(v.split('/')[1])}
  function fmtTime(v){return v.replace(' s','')+(v.includes('/')?' s':' s')}
@@ -193,11 +194,51 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
  setSelect('refTime',stops.time,state.time);setSelect('refAp',stops.ap,state.ap);setSelect('refIso',stops.iso,state.iso);
  $('settings').addEventListener('click',()=>$('manualPanel').classList.toggle('hidden'));
  $('applyRef').addEventListener('click',()=>{baseline={time:$('refTime').value,ap:$('refAp').value,iso:$('refIso').value};state.time=baseline.time;state.ap=baseline.ap;state.iso=baseline.iso;Object.keys(wheels).forEach(renderWheel);sync();$('readStatus').textContent='Referencia aplicada';$('resultText').textContent='Referencia establecida. Ahora cambia un parámetro: los demás se compensarán según el bloqueo.';$('manualPanel').classList.add('hidden')});
- $('readBtn').addEventListener('click',()=>{if(!baseline){baseline={...state};$('readStatus').textContent='Referencia guardada';$('resultText').textContent='Se guardó la exposición actual como referencia de prueba. Para una lectura real, primero hay que conectar y calibrar el análisis de luz de la cámara.'}else{$('readStatus').textContent='Referencia activa';$('resultText').textContent='La lectura de referencia sigue activa. Los cambios de parámetros mantienen la exposición equivalente.'}sync()});
+ $('readBtn').addEventListener('click',()=>{
+   if(liveBrightness===null){$('readStatus').textContent='Activa la cámara';$('resultText').textContent='Pulsa “Abrir cámara” y apunta a la escena para iniciar la estimación en tiempo real.';return}
+   const suggested=estimateExposure(liveBrightness);
+   baseline={time:suggested,ap:state.ap,iso:state.iso};state.time=suggested;
+   Object.keys(wheels).forEach(renderWheel);sync();$('readStatus').textContent='Estimación tomada';$('resultText').textContent='Se fijó una referencia experimental según el brillo de la vista previa. Puedes bloquear un parámetro y ajustar los demás; comprueba siempre el resultado con tu cámara o fotómetro.';
+ });
  $('reviewBtn').addEventListener('click',()=>{$('manualPanel').classList.toggle('hidden')});
- $('openCamera').addEventListener('click',async()=>{try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('No compatible');stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});$('video').srcObject=stream;$('video').classList.remove('hidden');$('photo').classList.add('hidden');$('placeholder').classList.add('hidden');$('takePhoto').disabled=false;$('readStatus').textContent='Cámara activa';$('resultText').textContent='Vista de cámara activa. Esta maqueta todavía no usa la exposición automática del teléfono como medición calibrada.'}catch(e){$('readStatus').textContent='Cámara no disponible';$('resultText').textContent='El navegador no permitió abrir la cámara. Prueba en Safari/Chrome con permiso de cámara y una conexión segura (HTTPS), o elige una foto.'}});
- $('takePhoto').addEventListener('click',()=>{if(!stream)return;const video=$('video'),canvas=document.createElement('canvas');canvas.width=video.videoWidth||640;canvas.height=video.videoHeight||480;const ctx=canvas.getContext('2d');ctx.drawImage(video,0,0,canvas.width,canvas.height);$('photo').src=canvas.toDataURL('image/jpeg',.9);$('photo').classList.remove('hidden');video.classList.add('hidden');$('placeholder').classList.add('hidden');photoBrightness=brightness(ctx.getImageData(0,0,canvas.width,canvas.height).data);$('readStatus').textContent='Foto capturada';$('resultText').textContent='Brillo relativo de la foto: '+Math.round(photoBrightness*100)+'%. Este dato no basta para determinar por sí solo una exposición real porque el teléfono ajusta la imagen automáticamente.';});
- $('upload').addEventListener('click',()=>$('file').click());$('file').addEventListener('change',()=>{const f=$('file').files[0];if(!f)return;const url=URL.createObjectURL(f);$('photo').src=url;$('photo').classList.remove('hidden');$('video').classList.add('hidden');$('placeholder').classList.add('hidden');const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=100;c.height=100;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,100,100);photoBrightness=brightness(x.getImageData(0,0,100,100).data);$('readStatus').textContent='Foto cargada';$('resultText').textContent='Brillo relativo: '+Math.round(photoBrightness*100)+'%. Estimación visual, no lectura calibrada de luz.'};img.src=url});
+ $('openCamera').addEventListener('click',async()=>{try{
+   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('No compatible');
+   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+   stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:640},height:{ideal:480}},audio:false});
+   $('video').srcObject=stream;$('video').classList.remove('hidden');$('photo').classList.add('hidden');$('placeholder').classList.add('hidden');$('takePhoto').disabled=false;
+   $('readStatus').textContent='Analizando en vivo';$('resultText').textContent='La aplicación analiza el brillo de la vista previa continuamente. Es una estimación experimental, porque el iPhone ajusta automáticamente la imagen.';
+   await $('video').play();startLiveMeter();
+ }catch(e){$('readStatus').textContent='Cámara no disponible';$('resultText').textContent='El navegador no permitió abrir la cámara. Prueba en Safari con permiso de cámara y conexión HTTPS, o elige una foto.'}});
+ $('takePhoto').addEventListener('click',()=>{if(!stream)return;if(liveMeterTimer){clearInterval(liveMeterTimer);liveMeterTimer=null}const video=$('video'),canvas=document.createElement('canvas');canvas.width=video.videoWidth||640;canvas.height=video.videoHeight||480;const ctx=canvas.getContext('2d');ctx.drawImage(video,0,0,canvas.width,canvas.height);$('photo').src=canvas.toDataURL('image/jpeg',.9);$('photo').classList.remove('hidden');video.classList.add('hidden');$('placeholder').classList.add('hidden');photoBrightness=brightness(ctx.getImageData(0,0,canvas.width,canvas.height).data);$('readStatus').textContent='Foto capturada';$('resultText').textContent='Brillo relativo de la foto: '+Math.round(photoBrightness*100)+'%. Este dato no basta para determinar por sí solo una exposición real porque el teléfono ajusta la imagen automáticamente.';});
+ $('upload').addEventListener('click',()=>$('file').click());$('file').addEventListener('change',()=>{const f=$('file').files[0];if(!f)return;if(liveMeterTimer){clearInterval(liveMeterTimer);liveMeterTimer=null}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}const url=URL.createObjectURL(f);$('photo').src=url;$('photo').classList.remove('hidden');$('video').classList.add('hidden');$('placeholder').classList.add('hidden');const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=100;c.height=100;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,100,100);photoBrightness=brightness(x.getImageData(0,0,100,100).data);$('readStatus').textContent='Foto cargada';$('resultText').textContent='Brillo relativo: '+Math.round(photoBrightness*100)+'%. Estimación visual, no lectura calibrada de luz.'};img.src=url});
+ function startLiveMeter(){
+   if(liveMeterTimer)clearInterval(liveMeterTimer);
+   const canvas=document.createElement('canvas');canvas.width=64;canvas.height=48;
+   const ctx=canvas.getContext('2d',{willReadFrequently:true});
+   liveMeterTimer=setInterval(()=>{
+     const video=$('video');if(!stream||video.readyState<2||!video.videoWidth)return;
+     try{
+       ctx.drawImage(video,0,0,canvas.width,canvas.height);
+       const data=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+       liveBrightness=brightness(data);
+       const percent=Math.round(liveBrightness*100);
+       $('liveBrightness').textContent='Brillo del encuadre: '+percent+'% · estimación experimental';
+       const suggested=estimateExposure(liveBrightness);
+       lastSuggestedTime=suggested;
+       $('resultTime').textContent=suggested;
+       $('readStatus').textContent='Lectura visual en vivo';
+       $('resultText').textContent='Velocidad orientativa calculada desde el brillo de la vista previa con f/'+state.ap+' e ISO '+state.iso+'. La exposición automática del teléfono puede hacer que esta estimación no corresponda a la luz real.';
+     }catch(e){$('liveBrightness').textContent='No se pudo analizar la vista previa.'}
+   },350);
+ }
+ function estimateExposure(brightnessValue){
+   // Ancla heurística: brillo de imagen 18% => 1/125 s a f/4 e ISO 100.
+   // Es solo una referencia visual, no una medición física calibrada.
+   const b=Math.max(.025,Math.min(.95,Number(brightnessValue)||.18));
+   const referenceSeconds=1/125;
+   const raw=referenceSeconds*(.18/b)*(Number(state.ap)**2/16)*(100/Number(state.iso));
+   return nearest('time',raw);
+ }
  function brightness(d){let total=0,n=0;for(let i=0;i<d.length;i+=4){total+=(.2126*d[i]+.7152*d[i+1]+.0722*d[i+2])/255;n++}return n?total/n:0}
  Object.keys(wheels).forEach(makeWheel);requestAnimationFrame(()=>{Object.keys(wheels).forEach(k=>renderWheel(k));sync()});
 })();
