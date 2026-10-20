@@ -17,7 +17,7 @@ button,select{font:inherit;color:var(--text);border:1px solid #525256;background
 .lockrow{display:flex;justify-content:space-around;margin:0 0 18px;color:#888;font-size:22px}.lockrow button{border:0;background:transparent;padding:6px;color:#929295;font-size:19px}.lockrow button.locked{color:#fff}
 .current{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:13px 2px 18px;font-size:12px;color:var(--muted)}.current strong{color:var(--text);font-size:13px;text-align:right}
 .mainactions{display:grid;gap:10px;margin-top:22px}.mainactions button{width:100%;border-radius:30px;min-height:56px;font-size:18px}.result{margin-top:18px;border:1px solid #39393c;border-radius:14px;padding:15px;background:#262628}.resulthead{display:flex;justify-content:space-between;gap:10px;align-items:center}.badge{font-size:11px;color:#bdbdc0;border:1px solid #555559;padding:5px 8px;border-radius:20px}.big{font-size:27px;font-weight:700;margin:12px 0 4px}.small{font-size:12px;line-height:1.5;color:var(--muted)}.notice{margin-top:12px;font-size:11px;line-height:1.5;color:#a8a8ab}
-.hidden{display:none!important}.file-picker{position:fixed;width:1px;height:1px;opacity:0;overflow:hidden;left:-10000px;top:0;z-index:-1}.manual{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.manual label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}.manual select{width:100%}
+.hidden{display:none!important}.file-picker{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;clip-path:inset(50%);left:0;top:0}.manual{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.manual label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}.manual select{width:100%}
 
 header{position:relative;justify-content:center;text-align:center;margin-bottom:22px;min-height:78px}
 .brandblock{display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -99,8 +99,8 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
  <div class="photoactions">
   <button class="primary" id="openCamera" type="button">Tomar fotografía</button>
   <button class="outline" id="upload" type="button">Elegir foto</button>
-  <input id="cameraFile" type="file" accept="image/*" capture="environment" class="file-picker">
-  <input id="galleryFile" type="file" accept="image/*,.heic,.heif" class="file-picker">
+  <input id="cameraFile" type="file" accept="image/*" capture="environment" class="file-picker" aria-label="Capturar fotografía">
+  <input id="galleryFile" type="file" accept="image/*,.heic,.heif" class="file-picker" aria-label="Elegir fotografía de la galería">
 </div>
 </section>
 
@@ -205,7 +205,7 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
    sync();$('readStatus').textContent='Referencia activa';
  });
  $('reviewBtn').addEventListener('click',()=>{$('manualPanel').classList.toggle('hidden')});
- // Cámara y galería separadas para compatibilidad con Safari en iOS.
+ // Selectores separados: cámara en un input con capture; galería en otro sin capture.
  $('openCamera').addEventListener('click',()=> $('cameraFile').click());
  $('upload').addEventListener('click',()=> $('galleryFile').click());
 
@@ -219,14 +219,14 @@ body[data-palette="pink"] .placeholder .subtitle{color:#fff!important;-webkit-te
      let meta=null;
      if(window.exifr && typeof window.exifr.parse==='function'){
        meta=await window.exifr.parse(f,{
-         tiff:true,
-         exif:true,
-         iptc:false,
-         icc:false,
-         xmp:false,
-         gps:false,
-         translateValues:true
-       });
+          tiff:true,
+          exif:true,
+          iptc:false,
+          icc:false,
+          xmp:false,
+          gps:false,
+          translateValues:true
+        });
      }
      if(!meta) meta={};
      const exp=Number(meta.ExposureTime ?? (meta.ShutterSpeedValue != null ? Math.pow(2,-Number(meta.ShutterSpeedValue)) : NaN));
